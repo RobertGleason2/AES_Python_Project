@@ -8,4 +8,23 @@ host = socket.gethostname()
 
 port = 7777
 
-connectionSocket.connect((host,port))
+connection = True
+while connection:
+    connectionSocket.connect((host, port))
+
+    message = "Hello"
+
+    messageBytes = message.encode()
+
+    connectionSocket.send(messageBytes)
+
+    #recieve
+    recievedBytes = connectionSocket.recv(1024)
+
+    recievedMessage = bytes.decode(recievedBytes)
+
+    print(recievedMessage)
+
+    connection == False
+
+connectionSocket.close()
