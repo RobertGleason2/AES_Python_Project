@@ -12,9 +12,25 @@ serverSocket.bind((host,port))
 #start listening 
 serverSocket.listen()
 
-print("Waiting for connection.....")
-# addr_port is a tuple that contains both the address and the port number
-#clientScoket is the communication variable between the host and port
-clientSocket, addr_port = serverSocket.accept()
+while True:
+    print("Waiting for connection.....")
+    # addr_port is a tuple that contains both the address and the port number
+    # clientSocket is the communication variable between the host and port
+    clientSocket, addr_port = serverSocket.accept()
 
-print("\nGot a connection from " + str(addr_port))
+    print("\nGot a connection from " + str(addr_port))
+
+    recievedBytes = clientSocket.recv(1024)
+
+    recievedMessage = bytes.decode(recievedBytes)
+
+    print (recievedMessage)
+
+    #Response
+    message = "Hi"
+
+    messageBytes = message.encode()
+
+    clientSocket.send(messageBytes)
+
+    clientSocket.close()
