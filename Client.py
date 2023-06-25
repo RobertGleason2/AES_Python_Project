@@ -1,30 +1,48 @@
 #Robert Gleason and Jacob Sprouse
+
 import socket
+from Server import Socket
+from Cryptodome.Cipher import AES
+from Cryptodome.Random import get_random_bytes
+from Cryptodome.Util.Padding import pad, unpad
 
 #create a socket object
-connectionSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+connectionSocket = Socket.Server()
 
-host = socket.gethostname()
+host = Socket.Host()
 
-port = 7777
+port = Socket.Port()
 
 connection = True
+key = get_random_bytes(16)
+connectionSocket.connect((host, port))
 while connection:
-    connectionSocket.connect((host, port))
 
-    message = "Hello"
+    message = input()
 
     messageBytes = message.encode()
 
-    connectionSocket.send(messageBytes)
+    encryptCipher = AES.new(key, AES.MODE_ECB)
 
-    #recieve
-    recievedBytes = connectionSocket.recv(1024)
+    decryptCipher = AES.new(key, AES.MODE_ECB)
 
-    recievedMessage = bytes.decode(recievedBytes)
+    cipherText = encryptCipher.encrypt(pad(messageBytes, AES.block_size))
+    print(cipherText)
+
+    connectionSocket.send(key)
+
+    connectionSocket.send(cipherText)
+
+    # recieve
+    recievedCipherText = connectionSocket.recv(1024)
+
+    decryptedBytes = unpad(decryptCipher.decrypt(recievedCipherText),AES.block_size)
+
+    recievedMessage = bytes.decode(decryptedBytes)
+
+    print(f"The cipher text is {recievedCipherText} and the message is {recievedMessage}")
 
     print(recievedMessage)
-
-    connection == False
-
-connectionSocket.close()
+    if recievedMessage == "Bye" or recievedMessage == "bye":
+        connection = False
+        connectionSocket.close()
