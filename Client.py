@@ -1,13 +1,11 @@
 # Robert Gleason and Jacob Sprouse
-# version 4
+# version 5
 
 import socket
-from Server import Socket
-from Server import Cipher
+import time
 from Cryptodome.Cipher import AES
 from Cryptodome.Random import get_random_bytes
-from Cryptodome.Util.Padding import pad, unpad
-
+from Classes import Socket, Cipher
 # create a socket object
 connectionSocket = Socket.Server()
 
@@ -45,19 +43,34 @@ while connection:
             received_message = Cipher.decryption_ecb(key, received_cipher_text)
         case 'CBC':
             cipher_text = Cipher.encryption_cbc(key, message, iv)
-            print(f"Ciphertext{cipher_text}")
+            print(f"Ciphertext {cipher_text}")
 
             connectionSocket.send(key)
 
             connectionSocket.send(cipher_text)
-
+            time.sleep(0.2)
             connectionSocket.send(iv)
-            print(f"IV{iv}")
+            print(f"IV {iv}")
 
             # receive
             received_cipher_text = connectionSocket.recv(1024)
 
-            received_message = Cipher.decryption_cbc(key, received_cipher_text, iv)
+            received_message = Cipher.decryption_ofb(key, received_cipher_text, iv)
+        case 'OFB':
+            cipher_text = Cipher.encryption_ofb(key, message, iv)
+            print(f"Ciphertext {cipher_text}")
+
+            connectionSocket.send(key)
+
+            connectionSocket.send(cipher_text)
+            time.sleep(0.2)
+            connectionSocket.send(iv)
+            print(f"IV {iv}")
+
+            # receive
+            received_cipher_text = connectionSocket.recv(1024)
+
+            received_message = Cipher.decryption_ofb(key, received_cipher_text, iv)
 
     print(f"The cipher text is {received_cipher_text} and the message is {received_message}")
 
